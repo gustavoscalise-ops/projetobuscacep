@@ -1,0 +1,56 @@
+body {
+    background-color: #f5f5f5;
+}
+
+.container-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h4 {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.buttons .btn {
+    margin: 5px;
+}
+body {
+    background-color: #f5f5f5;
+}
+
+.container-box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-top: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* TÍTULO BONITO + MAIÚSCULO */
+h4 {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.buttons .btn {
+    margin: 5px;
+}

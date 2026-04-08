@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Busca CEP</title>
+
+  <!-- Materialize -->
+  <link rel="stylesheet" href="css/materialize.min.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Ícones -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-wrapper blue">
+    <a href="#" class="brand-logo center">BUSCA CEP</a>
+  </div>
+</nav>
+
+<div class="container container-box">
+
+  <h4>BUSCA CEP</h4>
+
+  <!-- LOADER -->
+  <div id="loader" class="center" style="display: none; margin: 20px;">
+    <div class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-blue-only">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div>
+        <div class="gap-patch">
+          <div class="circle"></div>
+        </div>
+        <div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABAS -->
+  <ul class="tabs">
+    <li class="tab col s3"><a class="active" href="#cepTab">CEP</a></li>
+    <li class="tab col s3"><a href="#ruaTab">RUA</a></li>
+  </ul>
+
+  <!-- ================= CEP ================= -->
+  <div id="cepTab">
+
+    <div class="row">
+      <div class="input-field col s6">
+        <input id="cep" type="text">
+        <label for="cep">CEP</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="cidade" type="text">
+        <label for="cidade">Cidade</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="bairro" type="text">
+        <label for="bairro">Bairro</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="estado" type="text">
+        <label for="estado">Estado</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="rua" type="text">
+        <label for="rua">Rua</label>
+      </div>
+
+      <div class="input-field col s6">
+        <input id="ddd" type="text">
+        <label for="ddd">DDD</label>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn blue" onclick="buscarCEP()">Buscar</button>
+      <button class="btn red" onclick="limparCampos()">Limpar</button>
+    </div>
+
+  </div>
+
+  <!-- ================= RUA ================= -->
+  <div id="ruaTab">
+
+    <div class="row">
+
+      <div class="input-field col s4">
+        <select id="uf"></select>
+        <label>Estado</label>
+      </div>
+
+      <div class="input-field col s4">
+        <select id="cidadeSelect"></select>
+        <label>Cidade</label>
+      </div>
+
+      <div class="input-field col s4">
+        <input id="ruaBusca" type="text">
+        <label for="ruaBusca">Rua</label>
+      </div>
+
+    </div>
+
+    <div class="buttons">
+      <button class="btn green" onclick="buscarPorRua()">Buscar Rua</button>
+    </div>
+
+    <ul id="resultadoRua" class="collection"></ul>
+
+  </div>
+
+  <!-- LOG -->
+  <h5>Histórico</h5>
+  <ul id="logs" class="collection"></ul>
+
+</div>
+
+<!-- Scripts -->
+<script src="js/materialize.min.js"></script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
