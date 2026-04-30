@@ -46,6 +46,7 @@
   <ul class="tabs">
     <li class="tab col s3"><a class="active" href="#cepTab">CEP</a></li>
     <li class="tab col s3"><a href="#ruaTab">RUA</a></li>
+    <li class="tab col s3"><a href="#logTab">LOG</a></li>
   </ul>
 
   <!-- ================= CEP ================= -->
@@ -120,11 +121,17 @@
 
   </div>
 
-  <!-- LOG -->
-  <h5>Histórico</h5>
+  <div id="logTab">
+
+  <h5>Histórico de Consultas</h5>
+
   <ul id="logs" class="collection"></ul>
 
-</div>
+  <div class="buttons">
+    <button class="btn red" onclick="limparLogs()">Limpar Logs</button>
+  </div>
+
+
 
 <!-- Scripts -->
 <script src="js/materialize.min.js"></script>
