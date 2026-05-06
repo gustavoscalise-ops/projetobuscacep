@@ -1,245 +1,148 @@
-// ================= INICIALIZAÇÃO =================
-document.addEventListener('DOMContentLoaded', function () {
-    M.AutoInit();
-    carregarEstados();
-});
+// Função de buscar por CEP
+function mostrar() {
 
-// ================= LOADER =================
-function mostrarLoader() {
-    document.getElementById("loader").style.display = "block";
+	cep = document.getElementById("cep").value // pegando valor do cep
+	// url = "https://viacep.com.br/ws/"+cep+"/json/" // url do viacep
+	url = `https://viacep.com.br/ws/${cep}/json/` // url do viacep
+
+	log = `CEP|${new Date().toLocaleDateString('pt-BR')}|${cep}`
+
+	localStorage.setItem('logs',log)
+
+	// BUSCANDO O CEP USANDO FETCH
+	fetch(url)
+		.then((res) => { // variavel "res" irá armazenar a resposta inicial
+			return res.json() // convertendo a resposta em JSON
+		})
+		.then((cep) => { // variavel "cep" contendo o json com o CEP do viacep
+			console.log("Oi, meu CEP É no fetch", cep) // imprimindo os dados do cep
+			document.getElementById("cidade").value = cep.localidade
+			document.getElementById("bairro").value = cep.bairro
+			document.getElementById("ddd").value = cep.ddd
+			document.getElementById("estado").value = cep.uf
+			M.updateTextFields()
+		})
+	// FIM DA IMPLEMENTAÇÃO DO FETCH
+	console.log("Oi, meu CEP É fora", cep)
+}
+// tag fechamento do script JS
+
+// Função de buscar por rua
+function mostrarRua() {
+	uf = $("#lista-ufs").val()
+	cidade = $("#lista-cidades").val()
+	rua = $("#rua").val()
+
+	url = `https://viacep.com.br/ws/${uf}/${cidade}/${rua}/json/` // url do viacep
+
+	fetch(url)
+		.then((res) => { // variavel "res" irá armazenar a resposta inicial
+			return res.json() // convertendo a resposta em JSON
+		})
+		.then((ruas) => { // variavel "cep" contendo o json com o CEP do viacep
+			console.log("AQUI AS RUAS", ruas) // imprimindo os dados do cep
+
+			let listaRuas = ""
+
+			for (let rua of ruas) {
+				dadosRua = ""
+				const { ddd, ibge, regiao, siafi, ...ruaNova } = rua
+				for (let prop in ruaNova) {
+					dadosRua = dadosRua + `<h6>${ruaNova[prop]}</h6>`
+				}
+				listaRuas = listaRuas + `<li class="collection-item avatar">${dadosRua}</li>`
+			}
+
+			document.querySelector("#lista-ruas").innerHTML = listaRuas
+			confetti();
+		})
 }
 
-function esconderLoader() {
-    document.getElementById("loader").style.display = "none";
+function buscarUFs() {
+
+	const cepInput = document.getElementById("cep");
+
+	const mask = IMask(cepInput, {
+		mask: '00000-000'
+	});
+
+	url = "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
+	listaUfs = '<option value="" disabled selected>Escolha uma UF</option>'
+
+	axios.get(url) // AXIOS
+		.then((ufs) => {
+			console.log("com axios", ufs.data)
+
+			for (let uf of ufs.data) {
+				listaUfs += `<option value="${uf.sigla}">${uf.nome}</option>`
+			}
+			document.querySelector("#lista-ufs").innerHTML = listaUfs
+		})
 }
 
-// ================= CEP =================
-async function buscarCEP() {
-    const cep = document.getElementById("cep").value.replace(/\D/g, '');
+buscarUFs()
 
-    if (cep.length !== 8) {
-        M.toast({ html: "CEP inválido" });
-        return;
-    }
+function buscarCidades(uf) {
 
-    mostrarLoader();
+	url = `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`
+	listaCidades = '<option value="" disabled selected>Escolha umaa Cidade</option>'
 
-    try {
-        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const data = await response.json();
+	$.get(url, (cidades) => { //AJAX
 
-        if (data.erro) {
-            M.toast({ html: "CEP não encontrado" });
-            return;
-        }
+		for (let cidade of cidades) {
+			listaCidades += `<option value="${cidade.nome}">${cidade.nome}</option>`
+		}
+		document.querySelector("#lista-cidades").innerHTML = listaCidades
+	})
 
-        document.getElementById("rua").value = data.logradouro;
-        document.getElementById("bairro").value = data.bairro;
-        document.getElementById("cidade").value = data.localidade;
-        document.getElementById("estado").value = data.uf;
-        document.getElementById("ddd").value = data.ddd;
-
-        M.updateTextFields();
-
-        adicionarLog({
-            tipo: "cep",
-            valor: cep
-        });
-
-    } catch (e) {
-        console.error(e);
-        M.toast({ html: "Erro ao buscar CEP" });
-    }
-
-    esconderLoader();
 }
 
-// ================= LIMPAR =================
-function limparCampos() {
-    document.querySelectorAll("input").forEach(input => input.value = "");
-    M.updateTextFields();
+function buscarLog(log) {
+	valores = log.split("|")
+	if (valores[0].trim() === "CEP") {
+		document.querySelector('#cep-tab-link a').click();
+		document.querySelector("#cep").value = valores[2].trim()
+		setTimeout(() => {
+			mostrar()
+		}, 1000)
+	} else {
+		document.querySelector('#rua-tab-link a').click();
+		dados = valores[2].split("-")
+		document.querySelector("#lista-ufs").value = dados[0]
+		buscarCidades(dados[0])
+		document.querySelector("#rua").value = dados[2]
+		setTimeout(() => {
+			document.querySelector("#lista-cidades").value = dados[1]
+			mostrarRua()
+		}, 500)
+
+	}
 }
 
-// ================= ESTADOS =================
-async function carregarEstados() {
-    try {
-        const res = await fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados");
-        const estados = await res.json();
+function carregarLogs(){
+	logs = localStorage.getItem("logs")
 
-        const select = document.getElementById("uf");
-        select.innerHTML = '<option value="" disabled selected>Escolha o estado</option>';
-
-        estados.sort((a, b) => a.nome.localeCompare(b.nome));
-
-        estados.forEach(e => {
-            select.innerHTML += `<option value="${e.sigla}">${e.nome}</option>`;
-        });
-
-        M.FormSelect.init(select);
-
-    } catch (e) {
-        console.error("Erro ao carregar estados", e);
-    }
+	listaLogs = 
+	`
+	<li class="collection-item">
+    <div>${logs}<a href="#!" class="secondary-content"><i onclick="buscarLog('${logs}')"
+            class="material-icons">remove_red_eye</i></a></div>
+    </li>
+	`
+	document.querySelector("#lista-logs").innerHTML = listaLogs
 }
-
-// ================= CIDADES =================
-document.getElementById("uf").addEventListener("change", async function () {
-    const uf = this.value;
-
-    if (!uf) return;
-
-    mostrarLoader();
-
-    try {
-        const res = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
-        const cidades = await res.json();
-
-        const selectCidade = document.getElementById("cidadeSelect");
-        selectCidade.innerHTML = '<option value="" disabled selected>Escolha a cidade</option>';
-
-        cidades.forEach(c => {
-            selectCidade.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-        });
-
-        M.FormSelect.init(selectCidade);
-
-    } catch (e) {
-        console.error("Erro ao carregar cidades", e);
-    }
-
-    esconderLoader();
-});
-
-// ================= BUSCA POR RUA =================
-async function buscarPorRua() {
-    const uf = document.getElementById("uf").value;
-    const cidade = document.getElementById("cidadeSelect").value;
-    const rua = document.getElementById("ruaBusca").value;
-
-    if (!uf || !cidade || !rua) {
-        M.toast({ html: "Preencha todos os campos" });
-        return;
-    }
-
-    mostrarLoader();
-
-    try {
-        const response = await fetch(`https://viacep.com.br/ws/${uf}/${cidade}/${rua}/json/`);
-        const data = await response.json();
-
-        const lista = document.getElementById("resultadoRua");
-        lista.innerHTML = "";
-
-        if (!data || data.length === 0) {
-            lista.innerHTML = "<li class='collection-item'>Nenhum resultado encontrado</li>";
-            return;
-        }
-
-        data.forEach(endereco => {
-            lista.innerHTML += `
-                <li class="collection-item">
-                    <strong>${endereco.logradouro}</strong><br>
-                    ${endereco.bairro} - ${endereco.localidade}/${endereco.uf}<br>
-                    CEP: ${endereco.cep}
-                </li>
-            `;
-        });
-
-        adicionarLog({
-            tipo: "rua",
-            rua: rua,
-            cidade: cidade,
-            uf: uf
-        });
-
-    } catch (e) {
-        console.error(e);
-        M.toast({ html: "Erro na busca por rua" });
-    }
-
-    esconderLoader();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./service-worker.js")
+      .then(() => {
+        console.log("Service Worker registrado");
+      })
+      .catch(error => {
+        console.log("Erro ao registrar:", error);
+      });
+  });
 }
-
-// ================= LOG =================
-function adicionarLog(dados) {
-    const li = document.createElement("li");
-    li.className = "collection-item";
-
-    let texto = "";
-
-    if (dados.tipo === "cep") {
-        texto = `CEP: ${dados.valor}`;
-    } else {
-        texto = `RUA: ${dados.rua}, ${dados.cidade} - ${dados.uf}`;
-    }
-
-    li.innerHTML = `
-        ${texto}
-        <button class="btn-small blue right" onclick='rebuscar(${JSON.stringify(dados)})'>
-            <i class="material-icons">visibility</i>
-        </button>
-    `;
-
-    document.getElementById("logs").appendChild(li);
-}
-
-function limparLogs() {
-    document.getElementById("logs").innerHTML = "";
-}
-
-
-document.getElementById("logs").appendChild(li);
-
-function rebuscar(dados) {
-
-    if (dados.tipo === "cep") {
-
-        const inputCep = document.getElementById("cep");
-
-        inputCep.value = dados.valor;
-
-        // IMPORTANTE: atualizar Materialize
-        M.updateTextFields();
-
-        // força o valor antes da busca
-        setTimeout(() => {
-            buscarCEP();
-        }, 100);
-
-    } else {
-
-        const inputRua = document.getElementById("ruaBusca");
-        const selectUF = document.getElementById("uf");
-
-        inputRua.value = dados.rua;
-        selectUF.value = dados.uf;
-
-        M.updateTextFields();
-        M.FormSelect.init(selectUF);
-
-        // carregar cidades primeiro
-        setTimeout(async () => {
-
-            const res = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${dados.uf}/municipios`);
-            const cidades = await res.json();
-
-            const selectCidade = document.getElementById("cidadeSelect");
-            selectCidade.innerHTML = "";
-
-            cidades.forEach(c => {
-                selectCidade.innerHTML += `<option value="${c.nome}">${c.nome}</option>`;
-            });
-
-            selectCidade.value = dados.cidade;
-
-            M.FormSelect.init(selectCidade);
-
-            buscarPorRua();
-
-        }, 300);
-    }
-}
-
 
 
 
